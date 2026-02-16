@@ -33,3 +33,7 @@ dotnet run --project ./BlazorServerWithAuthAndDatabase/BlazorServerWithAuthAndDa
 # Contributors
 
 - [admin@werminal.com](admin@werminal.com)
+
+# References
+
+- [Microsoft Identity Web Library Docs](https://learn.microsoft.com/en-us/entra/msal/dotnet/microsoft-identity-web/)
