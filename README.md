@@ -6,6 +6,35 @@ The purpose of this project is to set a Blazor Server with Single Tenant Authent
 
 Install [.NET 10.0](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 
+# Authentication/Authorization
+
+I'm currently using Microsoft Entra ID.
+
+## Identity Setup
+
+- Create new App Registration
+- Set Redirect URL to `https://localhost:5001/signin-oidc`
+- Enable `Access tokens` & `ID tokens` under Implicit grant & hybrid flows.
+- Grant admin consent for Default Directory under API Permissions.
+- Copy `Client ID` & `Tenant ID` to appsettings.json
+  - Domain is under Entra ID
+
+
+## Mongo Setup
+
+- Install (or connect to) MongoDB
+- Create `BlazorServerWithAuthAndDatabase` database and `Weather` collections
+- Insert one or many documents (example below)
+
+```javascript
+db.Weather.insertMany([{
+    TemperatureC: 32,
+    Summary: 'Cold',
+    Date: ISODate()
+}])
+```
+
+
 # Run
 
 ### Open terminal and run the following

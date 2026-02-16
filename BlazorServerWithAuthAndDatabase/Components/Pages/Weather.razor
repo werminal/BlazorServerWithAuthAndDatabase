@@ -1,11 +1,12 @@
 ﻿@page "/weather"
+@using BlazorServerWithAuthAndDatabase.Services
 @attribute [StreamRendering]
 
 <PageTitle>Weather</PageTitle>
 
-<h1>Weather</h1>
+<h1>Weather from Mongo</h1>
 
-<p>This component demonstrates showing data.</p>
+<p>This component demonstrates pulling data from MongoDB.</p>
 
 @if (forecasts == null)
 {
@@ -37,28 +38,29 @@ else
 }
 
 @code {
+    [Inject] protected IWeatherService Service { get; set; }
+
+
     private WeatherForecast[]? forecasts;
 
     protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
         await Task.Delay(500);
 
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        var list = await Service.GetWeather();
+        forecasts = list.Select(x => new WeatherForecast
         {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
+            Date = x.Date,
+            TemperatureC = x.TemperatureC,
+            Summary = x.Summary
         }).ToArray();
     }
 
     private class WeatherForecast
     {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
+        public DateTime Date { get; init; }
+        public int TemperatureC { get; init; }
+        public string? Summary { get; init; }
         public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
     }
 }
