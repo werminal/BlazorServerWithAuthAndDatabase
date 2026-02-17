@@ -2,11 +2,7 @@
 
 namespace BlazorServerWithAuthAndDatabase.Services;
 
-public class UserContext : DbContext
+public class UserContext(DbContextOptions<UserContext> options) : DbContext(options)
 {
-    public UserContext(DbContextOptions<UserContext> options) : base(options)
-    {
-    }
-
     public DbSet<UserEntity> Users => Set<UserEntity>();
 }
