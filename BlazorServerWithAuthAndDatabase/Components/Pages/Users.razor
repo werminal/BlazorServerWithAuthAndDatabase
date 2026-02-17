@@ -1,0 +1,92 @@
+﻿@page "/users"
+@using BlazorServerWithAuthAndDatabase.Services
+@attribute [StreamRendering]
+@implements IDisposable
+
+<PageTitle>Users</PageTitle>
+
+<h1>Users from MSSQL</h1>
+
+<p>This component demonstrates pulling data from MSSQL.</p>
+
+@if (_users == null)
+{
+    <p><em>Loading...</em></p>
+    <button class="btn btn-danger" @onclick="Cancel">Cancel</button>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>First</th>
+            <th>Last</th>
+            <th>Email</th>
+            <th>Registered</th>
+        </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in _users)
+        {
+            <tr>
+                <td>@user.First</td>
+                <td>@user.Last</td>
+                <td>@user.Email</td>
+                <td>@user.Registered</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Inject] protected IUserService Service { get; set; }
+
+    private class UserModel
+    {
+        public string First { get; init; }
+        public string Last { get; init; }
+        public string? Email { get; init; }
+        public DateTime Registered { get; init; }
+    }
+
+    private CancellationTokenSource? _cts;
+    private UserModel[]? _users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _cts = new CancellationTokenSource();
+
+        await Task.Delay(500);
+
+        try
+        {
+            var list = await Service.GetUsers(_cts.Token);
+            _users = list.Select(x => new UserModel
+            {
+                First = x.First,
+                Last = x.Last,
+                Email = x.Email,
+                Registered = x.Registered
+            }).ToArray();
+        }
+        catch (OperationCanceledException e)
+        {
+            Console.WriteLine($"Cancellation Error: {e.Message}");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error: {e.Message}");
+        }
+    }
+
+    private void Cancel()
+    {
+        _cts?.Cancel();
+    }
+
+    public void Dispose()
+    {
+        _cts?.Dispose();
+    }
+}

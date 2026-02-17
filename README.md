@@ -34,6 +34,15 @@ db.Weather.insertMany([{
 }])
 ```
 
+## MSSQL Setup
+- Install (or connect to) MSSQL
+- Create `BlazorServerWithAuthAndDatabase` database and `Users` table
+- Insert one or many entries (example below)
+
+```sql
+INSERT INTO Users(First, Last, Email)
+VALUES('John', 'Stone', 'john@stone.com')
+```
 
 # Run
 

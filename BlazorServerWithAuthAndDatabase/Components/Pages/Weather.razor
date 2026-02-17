@@ -1,6 +1,7 @@
 ﻿@page "/weather"
 @using BlazorServerWithAuthAndDatabase.Services
 @attribute [StreamRendering]
+@implements IDisposable
 
 <PageTitle>Weather</PageTitle>
 
@@ -8,9 +9,10 @@
 
 <p>This component demonstrates pulling data from MongoDB.</p>
 
-@if (forecasts == null)
+@if (_forecasts == null)
 {
     <p><em>Loading...</em></p>
+    <button class="btn btn-danger" @onclick="Cancel">Cancel</button>
 }
 else
 {
@@ -24,7 +26,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var forecast in _forecasts)
             {
                 <tr>
                     <td>@forecast.Date.ToShortDateString()</td>
@@ -40,27 +42,51 @@ else
 @code {
     [Inject] protected IWeatherService Service { get; set; }
 
-
-    private WeatherForecast[]? forecasts;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await Task.Delay(500);
-
-        var list = await Service.GetWeather();
-        forecasts = list.Select(x => new WeatherForecast
-        {
-            Date = x.Date,
-            TemperatureC = x.TemperatureC,
-            Summary = x.Summary
-        }).ToArray();
-    }
-
     private class WeatherForecast
     {
         public DateTime Date { get; init; }
         public int TemperatureC { get; init; }
         public string? Summary { get; init; }
         public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+
+    private CancellationTokenSource? _cts;
+    private WeatherForecast[]? _forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _cts = new CancellationTokenSource();
+
+        await Task.Delay(500);
+        
+
+        try
+        {
+            var list = await Service.GetWeather();
+            _forecasts = list.Select(x => new WeatherForecast
+            {
+                Date = x.Date,
+                TemperatureC = x.TemperatureC,
+                Summary = x.Summary
+            }).ToArray();
+        }
+        catch (OperationCanceledException e)
+        {
+            Console.WriteLine($"Cancellation Error: {e.Message}");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error: {e.Message}");
+        }
+    }
+
+    private void Cancel()
+    {
+        _cts?.Cancel();
+    }
+
+    public void Dispose()
+    {
+        _cts?.Dispose();
     }
 }

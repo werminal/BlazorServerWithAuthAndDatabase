@@ -1,6 +1,7 @@
 using BlazorServerWithAuthAndDatabase.Components;
 using BlazorServerWithAuthAndDatabase.Services;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using MongoDB.Driver;
@@ -22,6 +23,7 @@ builder.Services.AddControllersWithViews()
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+//Mongo
 var mongoSettings = builder.Configuration.GetSection("MongoDB");
 
 var client = new MongoClient(mongoSettings["ConnectionString"]);
@@ -40,6 +42,14 @@ builder.Services.AddSingleton<IMongoCollection<WeatherEntity>>(sp =>
 });
 
 builder.Services.AddSingleton<IWeatherService, WeatherService>();
+
+//MSSQL
+builder.Services.AddDbContextFactory<UserContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
+});
+builder.Services.AddSingleton<IUserService, UserService>();
+
 
 var app = builder.Build();
 
